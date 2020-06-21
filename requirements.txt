@@ -1,6 +1,6 @@
-requests
-pandas
-
+requests~=2.23.0
+pandas~=1.0.4
+streamlit~=0.62.0
 
 #environment basics
 attrs==19.3.0
@@ -50,4 +50,5 @@ traitlets==4.3.3
 wcwidth==0.2.4
 webencodings==0.5.1
 widgetsnbextension==3.5.1
+
 
