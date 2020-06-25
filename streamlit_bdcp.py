@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import plotly.express as px
 import streamlit as st
 import pandas as pd
 
@@ -18,13 +19,14 @@ def resumetable(df):
     summary['Erster Wert'] = df.loc[0].values
     summary['Letzter Wert'] = df.loc[(len(df.index) - 1)].values
 
-#    for name in summary['Name'].value_counts().index:
-#        summary.loc[summary['Name'] == name, 'Entropie'] = round(
-#            stats.entropy(df[name].value_counts(normalize=True), base=2), 2)
+    #    for name in summary['Name'].value_counts().index:
+    #        summary.loc[summary['Name'] == name, 'Entropie'] = round(
+    #            stats.entropy(df[name].value_counts(normalize=True), base=2), 2)
 
     return summary
 
-#path = str(Path(os.getcwd()).parent) + '/acled_api.csv'
+
+# path = str(Path(os.getcwd()).parent) + '/acled_api.csv'
 path = str(Path(os.getcwd())) + '/acled_api.csv'
 if os.path.exists(path):
     filepath = path
@@ -38,7 +40,7 @@ read_and_cache_csv = st.cache(pd.read_csv)
 data = read_and_cache_csv(filepath)
 st.sidebar.subheader('Navigation')
 
-radio_navigation = st.sidebar.radio('Select Page:', ['Welcome', 'Filter Data'])
+radio_navigation = st.sidebar.radio('Select Page:', ['Welcome', 'Filter Data', 'Fatality Globe'])
 
 if radio_navigation == 'Welcome':
     st.write('This is my first streamlit app!')
@@ -94,6 +96,32 @@ elif radio_navigation == 'Filter Data':
                     & (data.country.isin(selectbox_country))
                     & (data.event_type.isin(selectbox_event_type))
                     ])
+        # TODO Make own Page
+        fig = px.scatter_mapbox(data[data.year.isin(x)],
+                                lat="latitude", lon="longitude", color="fatalities", size="fatalities",
+                                hover_data=['actor1', 'actor2'],
+                                color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=1)
+        fig.update_layout(mapbox_style="open-street-map")
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+        st.plotly_chart(fig)
+
+if radio_navigation == 'Fatality Globe':
+    data_map = data[['iso3', 'year', 'country', 'fatalities']].groupby(
+        ['year', 'country', 'iso3'], as_index=False).count().reset_index()
+
+    st.write(data_map)
+
+    fig = px.choropleth(
+        data_map,
+        locations="iso3",
+        locationmode="ISO-3",
+        hover_name="country",
+        animation_frame="year",
+        color='fatalities',
+        width=800, height=1000,
+        projection="orthographic")
+    st.plotly_chart(fig)
 
 mapstyle_dict = {"streets": "streets-v11",
                  "light": "light-v10",
