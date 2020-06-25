@@ -1,4 +1,4 @@
-FROM debian
+FROM python
 
 #set noninteractive timezone to german
 ENV DEBIAN_FRONTEND noninteractive
@@ -26,6 +26,7 @@ EXPOSE 8501
 RUN apt-get update && apt-get install -y\
     git\
     python\
+    python3-pip
 
 #Set working directory
 WORKDIR /var/lib
