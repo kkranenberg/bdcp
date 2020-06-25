@@ -24,9 +24,7 @@ EXPOSE 8501
 
 #Install git
 RUN apt-get update && apt-get install -y\
-    git\
-    python\
-    python3-pip
+    git
 
 #Set working directory
 WORKDIR /var/lib
