@@ -99,8 +99,9 @@ elif radio_navigation == 'Filter Data':
         # TODO Make own Page
         fig = px.scatter_mapbox(data[data.year.isin(x)],
                                 lat="latitude", lon="longitude", color="fatalities", size="fatalities",
-                                hover_data=['actor1', 'actor2'],
-                                color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=1)
+                                hover_data=['actor1', 'actor2','event_type'],
+                                color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=1,
+                                width=1000, height=800,)
         fig.update_layout(mapbox_style="open-street-map")
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
