@@ -25,6 +25,9 @@ EXPOSE 8501
 #Install git
 RUN apt-get update && apt-get install -y\
     git
+
+#Set working directory
+WORKDIR /var/lib
 #clone git
 RUN git clone https://github.com/kkranenberg/bdcp.git
 
