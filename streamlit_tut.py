@@ -24,8 +24,8 @@ def resumetable(df):
 
     return summary
 
-
-path = str(Path(os.getcwd()).parent) + '/acled_api.csv'
+#path = str(Path(os.getcwd()).parent) + '/acled_api.csv'
+path = str(Path(os.getcwd())) + '/acled_api.csv'
 if os.path.exists(path):
     filepath = path
 #    print('Using local ACLED')
