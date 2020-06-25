@@ -33,7 +33,7 @@ RUN git clone https://github.com/kkranenberg/bdcp.git
 
 #Set working directory
 WORKDIR /var/lib/bdcp
-
+RUN python acled-dl.py
 # install pip then packages
 RUN pip3 install -r requirements.txt
 

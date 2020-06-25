@@ -14,7 +14,7 @@ click==7.1.2
 colorama==0.4.3
 decorator==4.4.2
 defusedxml==0.6.0
-docutils==0.16
+docutils==0.15
 entrypoints==0.3
 enum-compat==0.0.3
 idna==2.9

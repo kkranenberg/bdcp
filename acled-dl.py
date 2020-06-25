@@ -1,8 +1,9 @@
-import requests
+
 import pandas as pd
-import io
-import json
-import urllib
+#import io
+#import json
+#import urllib
+#import requests
 print("Import successful!")
 
 print('Starting ACLED import.')
