@@ -33,9 +33,11 @@ RUN git clone https://github.com/kkranenberg/bdcp.git
 
 #Set working directory
 WORKDIR /var/lib/bdcp
-RUN python acled-dl.py
+
 # install pip then packages
 RUN pip3 install -r requirements.txt
 
+#download acled
+RUN python acled-dl.py
 # cmd to launch app when container is run
 CMD streamlit run streamlit_bdcp.py
