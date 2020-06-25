@@ -1,4 +1,4 @@
-FROM python
+FROM debian
 
 #set noninteractive timezone to german
 ENV DEBIAN_FRONTEND noninteractive
@@ -24,7 +24,8 @@ EXPOSE 8501
 
 #Install git
 RUN apt-get update && apt-get install -y\
-    git
+    git\
+    python\
 
 #Set working directory
 WORKDIR /var/lib
