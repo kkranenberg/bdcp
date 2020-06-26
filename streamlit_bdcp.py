@@ -8,6 +8,7 @@ import seaborn as sns
 from scipy import stats
 from matplotlib import pyplot as plt
 
+
 def resumetable(df):
     print(f"Dataset Shape: {df.shape}")
     summary = pd.DataFrame(df.dtypes, columns=['dtypes'])
@@ -26,6 +27,14 @@ def resumetable(df):
     return summary
 
 
+# mapstyle_dict = {"streets": "streets-v11",
+#                 "light": "light-v10",
+#                 "dark": "dark-v10",
+#                 "satellite": "satellite-v9"}
+
+# mapstyle = st.sidebar.selectbox('Map style', list(mapstyle_dict), 1)
+
+
 # path = str(Path(os.getcwd()).parent) + '/acled_api.csv'
 path = str(Path(os.getcwd())) + '/acled_api.csv'
 if os.path.exists(path):
@@ -35,9 +44,9 @@ else:
     print('Downloading ACLED')
     filepath = 'https://api.acleddata.com/acled/read.csv?terms=accept&limit=0'
 
+
 @st.cache
 def read_addmonth_cache(file):
-
     cf = pd.read_csv(file)
     cf['event_date'] = cf['event_date'].astype('datetime64[ns]')
     cf.insert(6, 'month', cf.event_date.dt.month, allow_duplicates=True)
@@ -50,14 +59,15 @@ read_and_cache_csv = st.cache(pd.read_csv, allow_output_mutation=True)
 data = read_addmonth_cache(filepath)
 
 # Add Month column
-#data= data['event_date'] = data['event_date'].astype('datetime64[ns]')
-#data.insert(6, 'month', data.event_date.dt.month, allow_duplicates=True)
+# data= data['event_date'] = data['event_date'].astype('datetime64[ns]')
+# data.insert(6, 'month', data.event_date.dt.month, allow_duplicates=True)
 st.sidebar.subheader('Navigation')
 
-radio_navigation = st.sidebar.radio('Select Page:', ['Welcome', 'Data Exploration', 'Filter Data', 'Scatter Map', 'Fatality Globe'])
+radio_navigation = st.sidebar.radio('Select Page:',
+                                    ['Welcome', 'Data Exploration', 'Filter Data', 'Scatter Map', 'Fatality Globe'])
 
 if radio_navigation == 'Welcome':
-    st.write('This is my first streamlit app!')
+    st.header('Schnelle Visualisierung und Distribution von Analysepiloten am Beispiel von Konfliktdaten')
     button_loadacled = st.button('Load newest ACLED-Dataset')
     if button_loadacled:
         data = read_and_cache_csv('https://api.acleddata.com/acled/read.csv?terms=accept&limit=0')
@@ -73,7 +83,16 @@ if radio_navigation == 'Data Exploration':
 
     plt.title('Data distribution by years')
     st.pyplot()
-    st.write('test')
+
+    x = st.slider("Select year", int(data.year.min()), int(data.year.max()), 2019)
+    plt.figure(figsize=(11, 10))
+    plt.xticks(rotation=0)
+
+    sns.countplot(x='event_type', data=data[data.year == x])
+
+    plt.title('Data distribution by event_type')
+    st.pyplot()
+
 
 elif radio_navigation == 'Filter Data':
 
@@ -84,7 +103,7 @@ elif radio_navigation == 'Filter Data':
         'Filter to event_type:', data[data.country.isin(selectbox_country)].event_type.unique())
     # st.write(selectbox_event_type)
 
-    x = st.sidebar.multiselect('Filter to year:', data[data.country.isin(selectbox_country)].year.unique(),)
+    x = st.sidebar.multiselect('Filter to year:', data[data.country.isin(selectbox_country)].year.unique(), )
 
     checkbox_fatalities = st.sidebar.checkbox("Show only events involving fatalities")
 
@@ -98,7 +117,23 @@ elif radio_navigation == 'Filter Data':
                       & (data.fatalities[data.fatalities >= 1])
                       ].head(10000))
 
-        st.subheader('Map of all pickups')
+        st.subheader('Map of all events')
+
+        fig = px.scatter_mapbox(data[data.year.isin(x)
+                                     & (data.country.isin(selectbox_country))
+                                     & (data.event_type.isin(selectbox_event_type))
+                                     & (data.fatalities >= 1)
+                                     ],
+                                lat="latitude", lon="longitude", color="fatalities", size="fatalities",
+                                hover_data=['actor1', 'actor2', 'event_type','event_date'],
+                                color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=5,
+                                width=1000, height=800,
+                                #            animation_frame="month"
+                                )
+        fig.update_layout(mapbox_style="open-street-map")
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+        st.plotly_chart(fig)
 
         st.map(data[data.year.isin(x)
                     & (data.country.isin(selectbox_country))
@@ -111,19 +146,36 @@ elif radio_navigation == 'Filter Data':
                       & (data.event_type.isin(selectbox_event_type))
                       ].head(10000))
 
-        st.subheader('Map of all pickups')
+        st.subheader('Map of all events')
+
+
+
+        fig = px.scatter_mapbox(data[data.year.isin(x)
+                                     & (data.country.isin(selectbox_country))
+                                     & (data.event_type.isin(selectbox_event_type))
+                                     ],
+                                lat="latitude", lon="longitude", color="fatalities", size="fatalities",
+                                hover_data=['actor1', 'actor2', 'event_type','event_date'],
+                                color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=5,
+                                width=1000, height=800,
+                                #            animation_frame="month"
+                                )
+        fig.update_layout(mapbox_style="open-street-map")
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+        st.plotly_chart(fig)
+
 
         st.map(data[data.year.isin(x)
                     & (data.country.isin(selectbox_country))
                     & (data.event_type.isin(selectbox_event_type))
                     ])
 
-
 elif radio_navigation == 'Scatter Map':
 
-    x = st.slider("Select year", int(data.year.min()), int(data.year.max()) , 2019)
+    x = st.sidebar.slider("Select year", int(data.year.min()), int(data.year.max()), 2019)
     slider_zoom = st.sidebar.slider("Select Zoomlevel", 0, 8, 2)
-    fig = px.scatter_mapbox(data[data.year == x],
+    fig = px.scatter_mapbox(data[data.year == x].sort_values(['month']),
                             lat="latitude", lon="longitude", color="fatalities", size="fatalities",
                             hover_data=['actor1', 'actor2', 'event_type'],
                             color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=slider_zoom,
@@ -135,7 +187,7 @@ elif radio_navigation == 'Scatter Map':
 
 elif radio_navigation == 'Fatality Globe':
     data_map = data[['iso3', 'year', 'country', 'fatalities']].groupby(
-        ['year', 'country', 'iso3'], as_index=False).count().reset_index()
+        ['year', 'country', 'iso3'], as_index=False).agg(['sum']).reset_index()
 
     st.write(data_map)
 
@@ -150,9 +202,3 @@ elif radio_navigation == 'Fatality Globe':
         projection="orthographic")
     st.plotly_chart(fig)
 
-mapstyle_dict = {"streets": "streets-v11",
-                 "light": "light-v10",
-                 "dark": "dark-v10",
-                 "satellite": "satellite-v9"}
-
-mapstyle = st.sidebar.selectbox('Map style', list(mapstyle_dict), 1)
