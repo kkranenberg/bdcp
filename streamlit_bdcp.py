@@ -9,6 +9,7 @@ from scipy import stats
 from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
 
+
 def resumetable(df):
     print(f"Dataset Shape: {df.shape}")
     summary = pd.DataFrame(df.dtypes, columns=['dtypes'])
@@ -55,7 +56,7 @@ def read_addmonth_cache(file):
 
 
 # Reuse this data across runs!
-#read_and_cache_csv = st.cache(pd.read_csv, allow_output_mutation=True)
+# read_and_cache_csv = st.cache(pd.read_csv, allow_output_mutation=True)
 data = read_addmonth_cache(filepath)
 
 # Add Month column
@@ -123,9 +124,6 @@ elif radio_navigation == 'Filter Data':
                       & (data.fatalities[data.fatalities >= 1])
                       ].head(10000))
 
-
-
-
         st.header('Map of filtered events')
         st.subheader('Showing only events involving fatalities')
 
@@ -135,7 +133,7 @@ elif radio_navigation == 'Filter Data':
                                      & (data.fatalities >= 1)
                                      ],
                                 lat="latitude", lon="longitude", color="fatalities", size="fatalities",
-                                hover_data=['actor1', 'actor2', 'event_type','event_date'],
+                                hover_data=['actor1', 'actor2', 'event_type', 'event_date'],
                                 color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=5,
                                 width=1000, height=800,
                                 #            animation_frame="month"
@@ -148,20 +146,18 @@ elif radio_navigation == 'Filter Data':
         checkbox_pegasus = st.sidebar.checkbox('Show Operation Pegasus')
 
         if checkbox_pegasus:
-
             img = mpimg.imread('Operation_Pegasus_2011.png')
             imgplot = plt.imshow(img)
             plt.show()
             st.pyplot()
 
-
         checkbox_brokenmap = st.sidebar.checkbox("Show broken streamlit map")
         if checkbox_brokenmap:
             st.map(data[data.year.isin(x)
-                    & (data.country.isin(selectbox_country))
-                    & (data.event_type.isin(selectbox_event_type))
-                    & (data.fatalities >= 1)
-                    ])
+                        & (data.country.isin(selectbox_country))
+                        & (data.event_type.isin(selectbox_event_type))
+                        & (data.fatalities >= 1)
+                        ])
     else:
         st.write(data[data.year.isin(x)
                       & (data.country.isin(selectbox_country))
@@ -170,14 +166,12 @@ elif radio_navigation == 'Filter Data':
 
         st.subheader('Map of all events')
 
-
-
         fig = px.scatter_mapbox(data[data.year.isin(x)
                                      & (data.country.isin(selectbox_country))
                                      & (data.event_type.isin(selectbox_event_type))
                                      ],
                                 lat="latitude", lon="longitude", color="fatalities", size="fatalities",
-                                hover_data=['actor1', 'actor2', 'event_type','event_date'],
+                                hover_data=['actor1', 'actor2', 'event_type', 'event_date'],
                                 color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=5,
                                 width=1000, height=800,
                                 #            animation_frame="month"
@@ -188,7 +182,6 @@ elif radio_navigation == 'Filter Data':
         st.plotly_chart(fig)
         checkbox_pegasus = st.sidebar.checkbox('Show Operation Pegasus')
         if checkbox_pegasus:
-
             img = mpimg.imread('Operation_Pegasus_2011.png')
             imgplot = plt.imshow(img)
             plt.show()
@@ -196,9 +189,9 @@ elif radio_navigation == 'Filter Data':
         checkbox_brokenmap = st.sidebar.checkbox("Show broken streamlit map")
         if checkbox_brokenmap:
             st.map(data[data.year.isin(x)
-                    & (data.country.isin(selectbox_country))
-                    & (data.event_type.isin(selectbox_event_type))
-                    ])
+                        & (data.country.isin(selectbox_country))
+                        & (data.event_type.isin(selectbox_event_type))
+                        ])
 
 elif radio_navigation == 'Scatter Map':
     st.header('Animated Scatter Map')
@@ -218,8 +211,6 @@ elif radio_navigation == 'Fatality Globe':
     st.header('Animated globe showing fatalities')
     data_map = data[['iso3', 'year', 'country', 'fatalities']].groupby(
         ['year', 'country', 'iso3'], as_index=False).agg(['sum']).reset_index()
-
-
 
     fig = px.choropleth(
         data_map,
