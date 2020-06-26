@@ -55,7 +55,7 @@ def read_addmonth_cache(file):
 
 
 # Reuse this data across runs!
-read_and_cache_csv = st.cache(pd.read_csv, allow_output_mutation=True)
+#read_and_cache_csv = st.cache(pd.read_csv, allow_output_mutation=True)
 data = read_addmonth_cache(filepath)
 
 # Add Month column
@@ -67,7 +67,7 @@ radio_navigation = st.sidebar.radio('Select Page:',
                                     ['Welcome', 'Data Exploration', 'Filter Data', 'Scatter Map', 'Fatality Globe'])
 
 if radio_navigation == 'Welcome':
-    st.header('Visualisierung und Distribution von Analysepiloten am Beispiel von Konfliktdaten')
+    st.header('Visualisierung und Distribution von Analyse-Piloten am Beispiel von Konfliktdaten')
     button_loadacled = st.button('Load newest ACLED-Dataset')
     if button_loadacled:
         data = read_and_cache_csv('https://api.acleddata.com/acled/read.csv?terms=accept&limit=0')
