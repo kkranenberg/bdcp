@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 from scipy import stats
 from matplotlib import pyplot as plt
-
+import matplotlib.image as mpimg
 
 def resumetable(df):
     print(f"Dataset Shape: {df.shape}")
@@ -67,7 +67,7 @@ radio_navigation = st.sidebar.radio('Select Page:',
                                     ['Welcome', 'Data Exploration', 'Filter Data', 'Scatter Map', 'Fatality Globe'])
 
 if radio_navigation == 'Welcome':
-    st.header('Schnelle Visualisierung und Distribution von Analysepiloten am Beispiel von Konfliktdaten')
+    st.header('Visualisierung und Distribution von Analysepiloten am Beispiel von Konfliktdaten')
     button_loadacled = st.button('Load newest ACLED-Dataset')
     if button_loadacled:
         data = read_and_cache_csv('https://api.acleddata.com/acled/read.csv?terms=accept&limit=0')
@@ -164,7 +164,13 @@ elif radio_navigation == 'Filter Data':
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
         st.plotly_chart(fig)
+        checkbox_pegasus = st.sidebar.checkbox('Show Operation Pegasus')
+        if checkbox_pegasus:
 
+            img = mpimg.imread('Operation_Pegasus_2011.png')
+            imgplot = plt.imshow(img)
+            plt.show()
+            st.pyplot()
 
         st.map(data[data.year.isin(x)
                     & (data.country.isin(selectbox_country))
