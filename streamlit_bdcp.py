@@ -4,9 +4,9 @@ from pathlib import Path
 import plotly.express as px
 import streamlit as st
 import pandas as pd
-
+import seaborn as sns
 from scipy import stats
-
+from matplotlib import pyplot as plt
 
 def resumetable(df):
     print(f"Dataset Shape: {df.shape}")
@@ -35,12 +35,26 @@ else:
     print('Downloading ACLED')
     filepath = 'https://api.acleddata.com/acled/read.csv?terms=accept&limit=0'
 
+@st.cache
+def read_addmonth_cache(file):
+
+    cf = pd.read_csv(file)
+    cf['event_date'] = cf['event_date'].astype('datetime64[ns]')
+    cf.insert(6, 'month', cf.event_date.dt.month, allow_duplicates=True)
+    print(type(cf))
+    return cf
+
+
 # Reuse this data across runs!
-read_and_cache_csv = st.cache(pd.read_csv)
-data = read_and_cache_csv(filepath)
+read_and_cache_csv = st.cache(pd.read_csv, allow_output_mutation=True)
+data = read_addmonth_cache(filepath)
+
+# Add Month column
+#data= data['event_date'] = data['event_date'].astype('datetime64[ns]')
+#data.insert(6, 'month', data.event_date.dt.month, allow_duplicates=True)
 st.sidebar.subheader('Navigation')
 
-radio_navigation = st.sidebar.radio('Select Page:', ['Welcome', 'Filter Data', 'Fatality Globe'])
+radio_navigation = st.sidebar.radio('Select Page:', ['Welcome', 'Data Exploration', 'Filter Data', 'Scatter Map', 'Fatality Globe'])
 
 if radio_navigation == 'Welcome':
     st.write('This is my first streamlit app!')
@@ -51,8 +65,15 @@ if radio_navigation == 'Welcome':
 
     st.write(resumetable(data))
 
-if radio_navigation == 'Exploration':
-    test = 'Test'
+if radio_navigation == 'Data Exploration':
+    plt.figure(figsize=(11, 10))
+    plt.xticks(rotation=0)
+
+    sns.countplot(x='year', data=data)
+
+    plt.title('Data distribution by years')
+    st.pyplot()
+    st.write('test')
 
 elif radio_navigation == 'Filter Data':
 
@@ -63,7 +84,7 @@ elif radio_navigation == 'Filter Data':
         'Filter to event_type:', data[data.country.isin(selectbox_country)].event_type.unique())
     # st.write(selectbox_event_type)
 
-    x = st.sidebar.multiselect('Filter to year:', data[data.country.isin(selectbox_country)].year.unique())
+    x = st.sidebar.multiselect('Filter to year:', data[data.country.isin(selectbox_country)].year.unique(),)
 
     checkbox_fatalities = st.sidebar.checkbox("Show only events involving fatalities")
 
@@ -96,18 +117,23 @@ elif radio_navigation == 'Filter Data':
                     & (data.country.isin(selectbox_country))
                     & (data.event_type.isin(selectbox_event_type))
                     ])
-        # TODO Make own Page
-        fig = px.scatter_mapbox(data[data.year.isin(x)],
-                                lat="latitude", lon="longitude", color="fatalities", size="fatalities",
-                                hover_data=['actor1', 'actor2','event_type'],
-                                color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=1,
-                                width=1000, height=800,)
-        fig.update_layout(mapbox_style="open-street-map")
-        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
-        st.plotly_chart(fig)
 
-if radio_navigation == 'Fatality Globe':
+elif radio_navigation == 'Scatter Map':
+
+    x = st.slider("Select year", int(data.year.min()), int(data.year.max()) , 2019)
+    slider_zoom = st.sidebar.slider("Select Zoomlevel", 0, 8, 2)
+    fig = px.scatter_mapbox(data[data.year == x],
+                            lat="latitude", lon="longitude", color="fatalities", size="fatalities",
+                            hover_data=['actor1', 'actor2', 'event_type'],
+                            color_continuous_scale=px.colors.cyclical.IceFire, size_max=15, zoom=slider_zoom,
+                            width=1000, height=800, animation_frame="month")
+    fig.update_layout(mapbox_style="open-street-map")
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+    st.plotly_chart(fig)
+
+elif radio_navigation == 'Fatality Globe':
     data_map = data[['iso3', 'year', 'country', 'fatalities']].groupby(
         ['year', 'country', 'iso3'], as_index=False).count().reset_index()
 
