@@ -75,7 +75,13 @@ if radio_navigation == 'Welcome':
 
     st.write(resumetable(data))
 
-if radio_navigation == 'Data Exploration':
+elif radio_navigation == 'Data Exploration':
+    st.subheader('Resumetable of the ACLED Dataset')
+
+    st.write(resumetable(data))
+
+    st.subheader('Data distribution by years')
+
     plt.figure(figsize=(11, 10))
     plt.xticks(rotation=0)
 
@@ -83,19 +89,19 @@ if radio_navigation == 'Data Exploration':
 
     plt.title('Data distribution by years')
     st.pyplot()
-
+    st.subheader('Data distribution by event_type and year')
     x = st.slider("Select year", int(data.year.min()), int(data.year.max()), 2019)
     plt.figure(figsize=(11, 10))
     plt.xticks(rotation=0)
 
-    sns.countplot(x='event_type', data=data[data.year == x])
+    sns.countplot(x='event_type', data=data[data.year == x].sort_values(['event_type']))
 
     plt.title('Data distribution by event_type')
     st.pyplot()
 
 
 elif radio_navigation == 'Filter Data':
-
+    st.header('Filter Data')
     st.sidebar.subheader('Filter')
     selectbox_country = st.sidebar.multiselect('Filter to country:', data.country.unique())
     # st.write(selectbox_iso3)
@@ -103,7 +109,7 @@ elif radio_navigation == 'Filter Data':
         'Filter to event_type:', data[data.country.isin(selectbox_country)].event_type.unique())
     # st.write(selectbox_event_type)
 
-    x = st.sidebar.multiselect('Filter to year:', data[data.country.isin(selectbox_country)].year.unique(), )
+    x = st.sidebar.multiselect('Filter to year:', data[data.country.isin(selectbox_country)].year.unique())
 
     checkbox_fatalities = st.sidebar.checkbox("Show only events involving fatalities")
 
@@ -117,7 +123,11 @@ elif radio_navigation == 'Filter Data':
                       & (data.fatalities[data.fatalities >= 1])
                       ].head(10000))
 
-        st.subheader('Map of all events')
+
+
+
+        st.header('Map of filtered events')
+        st.subheader('Showing only events involving fatalities')
 
         fig = px.scatter_mapbox(data[data.year.isin(x)
                                      & (data.country.isin(selectbox_country))
@@ -135,7 +145,19 @@ elif radio_navigation == 'Filter Data':
 
         st.plotly_chart(fig)
 
-        st.map(data[data.year.isin(x)
+        checkbox_pegasus = st.sidebar.checkbox('Show Operation Pegasus')
+
+        if checkbox_pegasus:
+
+            img = mpimg.imread('Operation_Pegasus_2011.png')
+            imgplot = plt.imshow(img)
+            plt.show()
+            st.pyplot()
+
+
+        checkbox_brokenmap = st.sidebar.checkbox("Show broken streamlit map")
+        if checkbox_brokenmap:
+            st.map(data[data.year.isin(x)
                     & (data.country.isin(selectbox_country))
                     & (data.event_type.isin(selectbox_event_type))
                     & (data.fatalities >= 1)
@@ -171,14 +193,15 @@ elif radio_navigation == 'Filter Data':
             imgplot = plt.imshow(img)
             plt.show()
             st.pyplot()
-
-        st.map(data[data.year.isin(x)
+        checkbox_brokenmap = st.sidebar.checkbox("Show broken streamlit map")
+        if checkbox_brokenmap:
+            st.map(data[data.year.isin(x)
                     & (data.country.isin(selectbox_country))
                     & (data.event_type.isin(selectbox_event_type))
                     ])
 
 elif radio_navigation == 'Scatter Map':
-
+    st.header('Animated Scatter Map')
     x = st.sidebar.slider("Select year", int(data.year.min()), int(data.year.max()), 2019)
     slider_zoom = st.sidebar.slider("Select Zoomlevel", 0, 8, 2)
     fig = px.scatter_mapbox(data[data.year == x].sort_values(['month']),
