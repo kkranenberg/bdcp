@@ -215,10 +215,11 @@ elif radio_navigation == 'Scatter Map':
     st.plotly_chart(fig)
 
 elif radio_navigation == 'Fatality Globe':
+    st.header('Animated globe showing fatalities')
     data_map = data[['iso3', 'year', 'country', 'fatalities']].groupby(
         ['year', 'country', 'iso3'], as_index=False).agg(['sum']).reset_index()
 
-    st.write(data_map)
+
 
     fig = px.choropleth(
         data_map,
@@ -231,3 +232,4 @@ elif radio_navigation == 'Fatality Globe':
         projection="orthographic")
     st.plotly_chart(fig)
 
+    st.write(data_map)
