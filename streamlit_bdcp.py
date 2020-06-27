@@ -71,7 +71,8 @@ if radio_navigation == 'Welcome':
     st.header('Visualisierung und Distribution von Analyse-Piloten am Beispiel von Konfliktdaten')
     button_loadacled = st.button('Load newest ACLED-Dataset')
     if button_loadacled:
-        data = read_addmonth_cache('https://api.acleddata.com/acled/read.csv?terms=accept&limit=0')
+        data = read_and_cache_csv('https://api.acleddata.com/acled/read.csv?terms=accept&limit=0')
+        data.to_csv('acled_api.csv', index=False)
         st.write('new ACLED loaded!')
 
     st.write(resumetable(data))
@@ -100,6 +101,14 @@ elif radio_navigation == 'Data Exploration':
     plt.title('Data distribution by event_type')
     st.pyplot()
 
+    check_corr = st.sidebar.checkbox('Show correltation heatmap')
+    if check_corr:
+        st.subheader('Correlation heatmap')
+
+        plt.figure(figsize=(11, 10))
+        plt.xticks(rotation=0)
+        sns.heatmap(data.corr(), annot=True)
+        st.pyplot()
 
 elif radio_navigation == 'Filter Data':
     st.header('Filter Data')
